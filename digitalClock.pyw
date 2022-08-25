@@ -2,6 +2,16 @@ from tkinter import *
 import time
 import sys
 
+class App(Tk):
+    def __init__(self, *args, **kwargs):
+        Tk.__init__(self, *args, **kwargs)
+        #Setup Frame
+        container = Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+
 master = Tk()
 master.title("Digital Clock")
 
@@ -52,4 +62,7 @@ clock.pack(expand=1, fill=BOTH)
 
 update_time()
 
-master.mainloop()
+#master.mainloop()
+
+app = App()
+app.mainloop()
