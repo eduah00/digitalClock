@@ -4,6 +4,7 @@ import sys
 
 master = Tk()
 master.title("Digital Clock")
+master.configure(background='red')
 
 #Moves the window accroding to the mouse position
 def move_window(event):

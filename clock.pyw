@@ -1,52 +1,17 @@
 from tkinter import *
 import time
 import sys
+from typing import Container
+from tkinter import messagebox
 
 class App(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         #Setup Frame
-        container = Frame(self, bg='black')
-        container.pack(side="bottom", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-    ################################################################################################
-        
-
-        self.overrideredirect(True) # turns off title bar, geometry
-        self.geometry('900x150') # set new geometry
-
-        # make a frame for the title bar
-        title_bar = Frame(self, bg='black', relief='sunken', bd=0)
-
-        # Make a label for the title
-        titleLabel = Label(title_bar, text="", font=("Helvetica", 10), fg="white", bg="black")
-        titleLabel.pack(side=LEFT, anchor=N, padx=15)
-
-        def on_enter(e):
-            close_button['background'] = 'red'
-
-        def on_leave(e):
-            close_button['background'] = 'black'
-
-        # put a close button on the title bar
-        close_button = Button(title_bar, text='X', command=self.destroy, activebackground='red', bg='black', fg='white', relief='sunken', bd=0)
-
-
-        # pack the widgets
-        title_bar.pack(expand=1, fill=BOTH)
-        close_button.pack(side=RIGHT, padx=4)
-
-        # bind title bar motion to the move window function
-        title_bar.bind('<B1-Motion>', move_window)
-        # bind the close button to the mouses hover to change the color of background
-        close_button.bind("<Enter>", on_enter)
-        close_button.bind("<Leave>", on_leave)
-
-    ################################################################################################
-    
-
-
+        container = Frame(self)
+        container.pack(side="bottom")
+        # container.grid_rowconfigure(0, weight=1)
+        # container.grid_columnconfigure(0, weight=1)        
 
 
         self.frames = {}
@@ -69,7 +34,7 @@ class StartPage(Frame):
 
         #Creates button to navigate to the clock page or the timer page
         clock_page = Button(self, text="Clock", font=("Helvetica", 45), bg="black", fg="white", bd=0,command=lambda: controller.show_frame(ClockPage))
-        clock_page.pack(side=LEFT, padx=130)
+        clock_page.pack(side=LEFT, padx=130, expand=3)
         timer_page = Button(self, text="Timer", font=("Helvetica", 45), bg="black", fg="white", bd=0,command=lambda: controller.show_frame(TimerPage))
         timer_page.pack(side=RIGHT, padx=130)
 
@@ -78,73 +43,81 @@ class ClockPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        label = Label(self, text="Welcome to the Clock", font=("Helvetica", 20))
-        label.pack(pady=10, padx=10)
+        def update_time():
+            timeVar = time.strftime("%I:%M:%S %p")
+            clock.config(text=timeVar)
+            clock.after(200, update_time)
+
+        # Create a label widget
+        clock = Label(self, font=("Helvetica .Black", 90, "bold"), bg="black", fg="white")
+        #Adds clock to the screen
+        clock.pack(side=BOTTOM, expand=1, fill=X)
+
+        update_time()
 
 class TimerPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
-        label = Label(self, text="Welcome to the Timer", font=("Helvetica", 20))
-        label.pack(pady=10, padx=10)
+        hourString = StringVar()
+        minuteString = StringVar()
+        secondString = StringVar()
+
+        ### Set strings to default value
+        hourString.set("00")
+        minuteString.set("00")
+        secondString.set("00")
+
+        ### Get user input
+        hourTextbox = Entry(self, width=3, font=("Helvetica .Black", 90, "bold"), textvariable=hourString, bg="black", fg="white")
+        minuteTextbox = Entry(self, width=3, font=("Helvetica .Black", 90, "bold"), textvariable=minuteString, bg="black", fg="white" )
+        secondTextbox = Entry(self, width=3, font=("Helvetica .Black", 90, "bold"), textvariable=secondString, bg="black", fg="white" )
+
+        ### Center textboxes
+        hourTextbox.pack(side=LEFT, padx=10)
+        minuteTextbox.pack(side=LEFT, padx=25)
+        secondTextbox.pack(side=LEFT, padx=50)
+
+        def runTimer():
+            try:
+                clockTime = int(hourString.get())*3600 + int(minuteString.get())*60 + int(secondString.get())
+            except:
+                print("Incorrect values")
+
+            while(clockTime > -1):
+                
+                totalMinutes, totalSeconds = divmod(clockTime, 60)
+
+                totalHours = 0
+                if(totalMinutes > 60):
+                    totalHours, totalMinutes = divmod(totalMinutes, 60)
+
+                hourString.set("{00:2d}".format(totalHours))
+                minuteString.set("{00:2d}".format(totalMinutes))
+                secondString.set("{00:2d}".format(totalSeconds))
+
+                ### Update the interface
+                self.update()
+                time.sleep(1)
+
+                ### Let the user know if the timer has expired
+                if(clockTime == 0):
+                    messagebox.showinfo("", "Your time has expired!")
+
+                clockTime -= 1
+
+
+        setTimeButton = Button(self, text='Set Time', bd='5', command=runTimer)
+        setTimeButton.pack(side=BOTTOM, padx=10, pady=10)
 
 
 
 
 
-
-
-# master = Tk()
-# master.title("Digital Clock")
-
-# #Moves the window accroding to the mouse position
 def move_window(event):
     app.geometry(f'+{event.x_root}+{event.y_root}')
 
-# master.overrideredirect(True) # turns off title bar, geometry
-# master.geometry('900x150') # set new geometry
-
-# # make a frame for the title bar
-# title_bar = Frame(master, bg='black', relief='sunken', bd=0)
-
-# # Make a label for the title
-# titleLabel = Label(title_bar, text="", font=("Helvetica", 10), fg="white", bg="black")
-# titleLabel.pack(side=LEFT, padx=15)
-
-# def on_enter(e):
-#     close_button['background'] = 'red'
-
-# def on_leave(e):
-#     close_button['background'] = 'black'
-
-# # put a close button on the title bar
-# close_button = Button(title_bar, text='X', command=master.destroy, activebackground='red', bg='black', fg='white', relief='sunken', bd=0)
-
-
-# # pack the widgets
-# title_bar.pack(expand=1, fill=BOTH)
-# close_button.pack(side=RIGHT, padx=4)
-
-# # bind title bar motion to the move window function
-# title_bar.bind('<B1-Motion>', move_window)
-# # bind the close button to the mouses hover to change the color of background
-# close_button.bind("<Enter>", on_enter)
-# close_button.bind("<Leave>", on_leave)
-
-# #Method that updates the clock label with the current time every 200 milliseconds
-# def update_time():
-#     timeVar = time.strftime("%I:%M:%S %p")
-#     clock.config(text=timeVar)
-#     clock.after(200, update_time)
-
-# # Create a label widget
-# clock = Label(master, font=("Helvetica .Black", 90, "bold"), bg="black", fg="white")
-# #Adds clock to the screen
-# clock.pack(expand=1, fill=BOTH)
-
-# update_time()
-
-#master.mainloop()
 
 app = App()
+app.configure(bg="Blue")
 app.mainloop()
